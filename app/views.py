@@ -4,9 +4,16 @@ Jinja2 Documentation:    https://jinja.palletsprojects.com/
 Werkzeug Documentation:  https://werkzeug.palletsprojects.com/
 This file creates your application.
 """
+from flask import Blueprint, render_template, request, jsonify, send_from_directory, current_app
+import os
+from werkzeug.utils import secure_filename
+from flask_wtf.csrf import generate_csrf
+from .forms import MovieForm
+from .models import Movie
+from . import db
 
 from flask import Blueprint, render_template, request, jsonify, send_from_directory
-import os
+
 
 # Create Blueprint
 main = Blueprint('main', __name__)
@@ -18,6 +25,50 @@ main = Blueprint('main', __name__)
 @main.route('/')
 def index():
     return jsonify(message="This is the beginning of our API")
+
+@main.route('/api/v1/csrf-token', methods=['GET'])
+def get_csrf():
+    return jsonify({'csrf_token': generate_csrf()})
+
+@main.route('/api/v1/movies', methods=['POST'])
+def movies():
+    form = MovieForm()
+
+    if form.validate_on_submit():
+
+        title = form.title.data
+        description = form.description.data
+        poster = form.poster.data
+
+        # Secure filename
+        filename = secure_filename(poster.filename)
+
+        upload_folder = os.path.join(current_app.root_path, 'uploads')
+        filepath = os.path.join(upload_folder, filename)
+
+        # Save file
+        poster.save(filepath)
+
+        # Save movie to database
+        movie = Movie(
+            title=title,
+            description=description,
+            poster=filename
+        )
+
+        db.session.add(movie)
+        db.session.commit()
+
+        return jsonify({
+            "message": "Movie Successfully added",
+            "title": title,
+            "poster": filename,
+            "description": description
+        })
+
+    # If validation fails
+    errors = form_errors(form)
+    return jsonify({"errors": errors})
 
 
 ###
