@@ -3,7 +3,7 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_wtf.csrf import CSRFProtect
-from .config import Config  # ← use relative import
+from .config import Config  # relative import
 
 db = SQLAlchemy()
 migrate = Migrate()

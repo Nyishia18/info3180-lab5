@@ -1,13 +1,12 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, TextAreaField, FileField
-from wtforms.validators import DataRequired
-from flask_wtf.file import FileAllowed
+from wtforms import StringField, TextAreaField
+from flask_wtf.file import FileField, FileAllowed, FileRequired
+from wtforms.validators import InputRequired
 
 class MovieForm(FlaskForm):
-    title = StringField('Movie Title', validators=[DataRequired()])
-
-    description = TextAreaField('Description', validators=[DataRequired()])
-
-    poster = FileField('Movie Poster', validators=[
-        FileAllowed(['jpg', 'jpeg', 'png'], 'Images only!')
+    title = StringField('Title', validators=[InputRequired()])
+    description = TextAreaField('Description', validators=[InputRequired()])
+    poster = FileField('Poster', validators=[
+        FileRequired(),
+        FileAllowed(['jpg', 'png', 'jpeg'], 'Images only!')
     ])
